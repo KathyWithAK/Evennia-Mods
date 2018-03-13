@@ -39,7 +39,7 @@ set up as a property on the object or character's typeclass.
     
     Methods:
         convert(Currency, Optional amount): Convert between Currency types.
-		contents(): List all currencies that have amounts greater than zero
+	contents(): List all currencies that have amounts greater than zero
 		
     Examples:
         ```python
@@ -49,7 +49,7 @@ set up as a property on the object or character's typeclass.
         >>> str(purse.CC)
         '35 copper coins'
         >>> self.purse.contents
-		20 copper coins, 2 silver coins
+	20 copper coins, 2 silver coins
         >>> purse
         Currency({'CC': {'amt': 35, 'value': 10, 'name': 'copper coin'}, 
         'SC': {'amt': 19, 'value': 100, 'name': 'silver coin'}, 
