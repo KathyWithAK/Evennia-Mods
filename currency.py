@@ -5,27 +5,27 @@ They are instantiated by the 'CurrencyHandler' object, which is typically
 set up as a property on the object or character's typeclass.
 
 **Setup**
-	To use currency on an object, add a function that passes the object
-	itself into the constructor and returns a 'CurrencyHandler'. This 
-	function should be decorated with the 'lazy_property' decorator.
+    To use currency on an object, add a function that passes the object
+    itself into the constructor and returns a 'CurrencyHandler'. This 
+    function should be decorated with the 'lazy_property' decorator.
 
-	Example:
-	```python
-		from evennia.utils import lazy_property
-		from world.currency import CurrencyHandler
+    Example:
+    ```python
+        from evennia.utils import lazy_property
+        from world.currency import CurrencyHandler
 
-		Class Object(DefaultObject):
-		...
-		@lazy_property
-		def purse(self):
-        	return CurrencyHandler(self, db_attribute='purse')
+        Class Object(DefaultObject):
+        ...
+        @lazy_property
+        def purse(self):
+            return CurrencyHandler(self, db_attribute='purse')
     ```
 **Currency Configuration**
-	'Currency' objects can be configured with a name and a value (relative to other
-	Currency). All currency objects have a settable 'amt' property that contains the 
-	amount of that currency type.
+    'Currency' objects can be configured with a name and a value (relative to other
+    Currency). All currency objects have a settable 'amt' property that contains the 
+    amount of that currency type.
 
-	Example:
+    Example:
         ```python
         >>> gp = obj.currency.gp
         >>> gp.amt
@@ -33,25 +33,28 @@ set up as a property on the object or character's typeclass.
         ```
 
     Constructor Args:
-    	name(str): name of the currency type
-    	value(int, float): value based on other currency types in handler
-    	amt(int, float): amount of currency type held
-	
-	Methods:
-		convert(Currency, Optional amount): Convert between Currency types.
-
-	Examples:
-		```python
-		>>> purse.CC.convert(self.purse.SC,2)
-		Converted 2 silver coin --> 20 copper coin
-		>>> purse.CC.amt = 4	# Add 4 copper coins
-		>>> str(purse.CC)
-		'35 copper coins'
-		>>> purse
-		Currency({'CC': {'amt': 35, 'value': 10, 'name': 'copper coin'}, 
-		'SC': {'amt': 19, 'value': 100, 'name': 'silver coin'}, 
-		'GC': {'amt': 20, 'value': 1000, 'name': 'gold coin'}, 
-		'BC': {'amt': 0, 'value': 1, 'name': 'brass coin'}})
+        name(str): name of the currency type
+        value(int, float): value based on other currency types in handler
+        amt(int, float): amount of currency type held
+    
+    Methods:
+        convert(Currency, Optional amount): Convert between Currency types.
+		contents(): List all currencies that have amounts greater than zero
+		
+    Examples:
+        ```python
+        >>> purse.CC.convert(self.purse.SC,2)
+        Converted 2 silver coin --> 20 copper coin
+        >>> purse.CC.amt = 4    # Add 4 copper coins
+        >>> str(purse.CC)
+        '35 copper coins'
+        >>> self.purse.contents
+		20 copper coins, 2 silver coins
+        >>> purse
+        Currency({'CC': {'amt': 35, 'value': 10, 'name': 'copper coin'}, 
+        'SC': {'amt': 19, 'value': 100, 'name': 'silver coin'}, 
+        'GC': {'amt': 20, 'value': 1000, 'name': 'gold coin'}, 
+        'BC': {'amt': 0, 'value': 1, 'name': 'brass coin'}})
 """
 from evennia.utils.dbserialize import _SaverDict
 from evennia.utils import logger, lazy_property
@@ -140,6 +143,17 @@ class CurrencyHandler(object):
     def all(self):
         # Return a list of all currency in this CurrencyHandler.
         return self.attr_dict.keys()
+
+    @property
+    def contents(self):
+        # Return a formatted list of currency and amounts in this CurrencyHandler.
+        liststr = ""
+        for key in self.attr_dict.keys():
+            cur = Currency(self.attr_dict[key])
+            if cur.amt > 0:
+                liststr += "{}, ".format(cur)
+        if len(liststr.strip()) > 0: return liststr[:-2]
+        else: return liststr.strip()
 
 @total_ordering
 class Currency(object):
@@ -323,17 +337,17 @@ class Currency(object):
                 modifier = obj.value / self.value
                 self.amt += amt_to_convert * modifier
                 print "Converted {} {} --> {} {}".format(
-                	amt_to_convert, obj.name, amt_to_convert * modifier, self.name)
+                    amt_to_convert, obj.name, amt_to_convert * modifier, self.name)
             elif obj.value < self.value:
                 modifier = self.value / obj.value
                 self.amt += amt_to_convert / modifier
                 print "Converted {} {} --> {} {}".format(
-                	amt_to_convert, obj.name, amt_to_convert / modifier, self.name)                
+                    amt_to_convert, obj.name, amt_to_convert / modifier, self.name)                
             else:
                 modifier = 1
                 self.amt += amt_to_convert
                 print "Converted {} {} --> {} {}".format(
-                	amt_to_convert, obj.name, amt_to_convert, self.name)
+                    amt_to_convert, obj.name, amt_to_convert, self.name)
 
         else:
             return NotImplemented
