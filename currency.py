@@ -5,6 +5,10 @@ They are instantiated by the 'CurrencyHandler' object, which is typically
 set up as a property on the object or character's typeclass.
 
 **Setup**
+    
+    To use currency on an object, add a function that passes the object	
+    itself into the constructor and returns a 'CurrencyHandler'. This 	
+    function should be decorated with the 'lazy_property' decorator.
 
     Example:
     ```python
